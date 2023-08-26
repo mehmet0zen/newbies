@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../newbieIcon.ico">
+<title>Vote Results</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,300&display=swap');
+    h1 {
+        color: #333;
+        margin-right: 40px !important;
+    }
+    body {
+        font-family: 'Bricolage Grotesque', sans-serif;
+    }
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+    li {
+        padding: 30px;
+        border: 1px solid #f3f3f3;
+        margin: 15px 30px;
+        border-radius: 45px;
+        transition: border 0.5s;
+        cursor: default;
+    }
+    li:hover {
+        background-color: #ffffff;
+        border: 5px solid rgb(255, 118, 118);
+    }
+    .percentage {
+        display: none;
+        font-size: 14px;
+        color: #ff6161;
+        margin-left: 20px;
+    }
+    li:hover .percentage {
+        display: inline;
+    }
+
+    .wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .wrapper-text {
+        font-size: 14px;
+        color: #333;
+        margin: 0 15px;
+    }
+
+    .author {
+        color: rgb(248, 88, 88);
+        cursor: pointer;
+    }
+
+    .author:hover {
+        text-decoration: underline;
+    }
+
+    .numOfPeople {
+        color: rgb(255, 177, 100);
+    }
+
+
+    .radio-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-left: 40px;
+        margin-bottom: 20px;
+      }
+    
+      .radio-label {
+        display: inline-block;
+        padding: 5px 10px;
+        border: 2px solid #ffb3b3;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s, transform 0.2s;
+      }
+    
+      input[type="radio"] {
+        display: none;
+      }
+    
+      input[type="radio"]:checked + label {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+        transform: scale(1.05);
+      }
+    
+      .radio-label:hover {
+        transform: scale(1.05);
+      }
+</style>
+</head>
+<body>
+    <div class="wrapper">
+        <h1>Theme Results</h1>
+        <span class="wrapper-text numOfPeople">Game Jam hosted by <a class="author" href="https://kosmotion.itch.io/" target="_blank">kosmotion</a></span>
+    </div>
+    <div class="radio-group">
+        <input type="radio" name="filter" value="sorted" id="sorted" checked>
+        <label class="radio-label" for="sorted">Sorted</label>
+        
+        <input type="radio" name="filter" value="most_voted" id="most_voted">
+        <label class="radio-label" for="most_voted">Most Voted</label>
+    </div>
+
+    <ul id="voteList">
+
+    </ul>
+
+  <script>
+    const radioButtons = document.querySelectorAll('input[type="radio"]');
+
+    radioButtons.forEach(button => {
+      button.addEventListener('change', function() {
+        if (this.checked) {
+          const selectedValue = this.value;
+          handleRadioButtonChange(selectedValue);
+        }
+      });
+    });
+
+    function handleRadioButtonChange(selectedValue) {
+        loadVoteData(selectedValue === "most_voted");
+    }
+
+    async function fetchCSV(url) {
+        const response = await fetch(url);
+        const text = await response.text();
+        return text;
+    }
+
+    async function processData(csvText) {
+        const lines = csvText.trim().split('\n');
+        const header = lines.shift().split(',');
+        
+        const votes = lines.map(line => {
+            const values = line.split(',');
+            const vote = {};
+            header.forEach((key, index) => {
+                vote[key.trim()] = values[index].replaceAll('"', "");
+            });
+            
+            return vote;
+        });
+        votes.forEach((vote) => {
+            vote["Votes"] = countVote(votes, vote["Idea"]);
+        })
+        return votes;
+    }
+
+    function countVote(dict, idea) {
+        var count = 0;
+        dict.forEach(vote => {
+            if (vote["Idea"] === idea) count++;
+        });
+        return count;
+    }
+
+    async function loadVoteData(sortedByMostVoted) {
+        try {
+            const csvText = await fetchCSV('votes.csv');
+            const votes = await processData(csvText);
+            
+            const voteList = document.getElementById('voteList');
+            voteList.innerHTML = "";
+            const newVotes = new Map();
+            // Loop through the votes array to populate the uniqueIdeas map
+            for (const vote of votes) {
+                const idea = vote["Idea"];
+                newVotes.set(idea, vote);
+            }
+            const deduplicatedVotes = [...newVotes.values()];
+            if (sortedByMostVoted)
+            deduplicatedVotes.sort((a, b) => parseInt(b["Votes"]) - parseInt(a["Votes"]));
+            else { deduplicatedVotes.sort((a, b) => parseInt(b["Idea"].split(".")[0]) - parseInt(a["Idea"].split(".")[0])); deduplicatedVotes.reverse();}
+
+            deduplicatedVotes.forEach(vote => {
+                //const li = document.createElement('li');
+                //console.log(Object.keys(vote));
+                const itchUsername = vote["Itch"].trim();
+                const idea = vote["Idea"].trim();
+                const votesCount = vote["Votes"];
+                const totalCount = votes.reduce((sum, v) => sum + v["Votes"], 0);
+                const percentageValue = (votesCount / totalCount) * 100;
+                var onClick = "";
+
+                if (idea.includes("by"))
+                    onClick = `'${idea.split('by')[1].trim()}'`;
+                else 
+                    onClick = "'kosmotion'";
+
+                const percentage = document.createElement('span');
+                percentage.className = 'percentage';
+                percentage.textContent = `(${percentageValue.toFixed(2)}%)`;
+                
+                voteList.innerHTML += `<li><strong>${idea.split("by")[0]}</strong> <span class="author" onClick=locateToProfile(${onClick})>${("by " + onClick).replaceAll("'", "").replace("by kosmotion", "")}</span>: <span class="numOfPeople">${votesCount} PEOPLE VOTED</span> </li>`;
+                voteList.children[voteList.children.length-1].appendChild(percentage);
+            });
+        } catch (error) {
+            console.error('Error loading vote data:', error);
+        }
+    }
+
+    function locateToProfile(itch) {
+        window.open(`https://itch.io/search?q=${itch.replaceAll(" ", "+")}`, "_blank");
+    }
+
+    // Load vote data when the page is ready
+    window.addEventListener('DOMContentLoaded', loadVoteData(false));  
+    
+  </script>
+</body>
+</html>
