@@ -204,7 +204,7 @@
                 percentage.className = 'percentage';
                 percentage.textContent = `(${percentageValue.toFixed(2)}%)`;
                 
-                voteList.innerHTML += `<li><strong>${idea.split("by")[0]}</strong> <span class="author" onClick=locateToProfile(${onClick})>${("by " + onClick).replaceAll("'", "").replace("by kosmotion", "")}</span>: <span class="numOfPeople">${votesCount} PEOPLE VOTED</span> </li>`;
+                voteList.innerHTML += `<li><strong>${idea.split("by")[0]}</strong> <span class="author" onClick=locateToProfile(${onClick.replaceAll(" ", "+")})>${("by " + onClick).replaceAll("'", "").replace("by kosmotion", "")}</span>: <span class="numOfPeople">${votesCount} PEOPLE VOTED</span> </li>`;
                 voteList.children[voteList.children.length-1].appendChild(percentage);
             });
         } catch (error) {
@@ -213,7 +213,7 @@
     }
 
     function locateToProfile(itch) {
-        window.open(`https://itch.io/search?q=${itch.replaceAll(" ", "+")}`, "_blank");
+        window.open(`https://itch.io/search?q=${itch}`, "_blank");
     }
 
     // Load vote data when the page is ready
