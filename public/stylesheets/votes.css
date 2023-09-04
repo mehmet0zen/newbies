@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,300&display=swap');
+h1 {
+    color: #333;
+    margin-right: 40px !important;
+}
+body {
+    font-family: 'Bricolage Grotesque', sans-serif;
+}
+ul {
+    list-style: none;
+    padding: 0;
+}
+li {
+    padding: 30px;
+    border: 1px solid #f3f3f3;
+    margin: 15px 30px;
+    border-radius: 45px;
+    transition: border 0.5s;
+    cursor: default;
+}
+li:hover {
+    background-color: #ffffff;
+    border: 5px solid rgb(255, 118, 118);
+}
+.percentage {
+    display: none;
+    font-size: 14px;
+    color: #ff6161;
+    margin-left: 20px;
+}
+li:hover .percentage {
+    display: inline;
+}
+
+.wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.wrapper-text {
+    font-size: 14px;
+    color: #333;
+    margin: 0 15px;
+}
+
+.author {
+    color: rgb(248, 88, 88);
+    cursor: pointer;
+}
+
+.author:hover {
+    text-decoration: underline;
+}
+
+.numOfPeople {
+    color: rgb(255, 177, 100);
+}
+
+
+.radio-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-left: 40px;
+    margin-bottom: 20px;
+}
+
+.radio-label {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 2px solid #ffb3b3;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+input[type="radio"]:checked + label {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    transform: scale(1.05);
+}
+
+.radio-label:hover {
+    transform: scale(1.05);
+}
